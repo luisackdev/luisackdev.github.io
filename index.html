@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luis Cruz — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+
+body{
+  background:#0f0f1a;
+  font-family:'VT323',monospace;
+  image-rendering:pixelated;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cur{
+  width:12px;height:12px;
+  background:#fff;
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9999;
+  image-rendering:pixelated;
+  clip-path:polygon(0 0,100% 50%,0 100%);
+}
+
+/* ── PARALLAX LAYERS ── */
+#world{
+  position:relative;width:100%;height:100vh;
+  overflow:hidden;
+}
+
+/* Sky gradient */
+#sky{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,#0a0a1f 0%,#1a1035 40%,#2d1b4e 70%,#1a0a2e 100%);
+}
+
+/* Stars */
+#stars{position:absolute;inset:0;pointer-events:none;}
+.star{
+  position:absolute;
+  background:#fff;
+  image-rendering:pixelated;
+  animation:twinkle var(--d,2s) infinite var(--delay,0s);
+}
+@keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.2}}
+
+/* Moon */
+#moon{
+  position:absolute;top:8%;right:12%;
+  width:60px;height:60px;
+  background:#fffde0;
+  box-shadow:inset -12px -4px 0 #e8d870, 0 0 30px rgba(255,253,200,.25);
+  image-rendering:pixelated;
+  clip-path:polygon(
+    10% 0%,90% 0%,100% 10%,100% 90%,
+    90% 100%,10% 100%,0% 90%,0% 10%
+  );
+}
+
+/* Mountains parallax */
+.mountains{position:absolute;bottom:0;width:100%;pointer-events:none;}
+#mtn-far{bottom:180px;opacity:.4;}
+#mtn-mid{bottom:120px;opacity:.65;}
+#mtn-near{bottom:60px;opacity:.85;}
+
+/* Ground layers */
+#ground-back{
+  position:absolute;bottom:100px;left:0;right:0;height:80px;
+  background:repeating-linear-gradient(
+    90deg,
+    #1a2a1a 0px,#1a2a1a 4px,
+    #1e2e1e 4px,#1e2e1e 8px
+  );
+}
+#ground-mid{
+  position:absolute;bottom:60px;left:0;right:0;height:44px;
+  background:repeating-linear-gradient(
+    90deg,
+    #223322 0px,#223322 4px,
+    #2a3d2a 4px,#2a3d2a 8px
+  );
+}
+#ground{
+  position:absolute;bottom:0;left:0;right:0;height:64px;
+  background:repeating-linear-gradient(
+    90deg,
+    #2d4a2d 0px,#2d4a2d 4px,
+    #365a36 4px,#365a36 8px
+  );
+  border-top:4px solid #4a7a4a;
+}
+
+/* Pixel decorations on ground */
+.tree{
+  position:absolute;bottom:60px;
+  image-rendering:pixelated;
+  pointer-events:none;
+}
+
+/* Scrolling road/path indicators */
+#road{
+  position:absolute;bottom:64px;left:0;right:0;height:4px;
+  background:repeating-linear-gradient(
+    90deg,#7aaa7a 0,#7aaa7a 16px,transparent 16px,transparent 32px
+  );
+  animation:roadScroll 1s linear infinite;
+}
+@keyframes roadScroll{from{background-position:0}to{background-position:-32px}}
+
+/* ── PARALLAX SCROLLING LAYERS ── */
+#layer-far{
+  position:absolute;top:0;left:0;will-change:transform;
+  transition:transform .05s linear;
+}
+#layer-mid{
+  position:absolute;top:0;left:0;will-change:transform;
+  transition:transform .05s linear;
+}
+
+/* ── CHARACTER ── */
+#char-wrap{
+  position:absolute;
+  bottom:68px;
+  left:120px;
+  z-index:20;
+  transition:bottom .15s;
+}
+
+/* Pixel art character built in CSS */
+#character{
+  position:relative;
+  width:48px;height:64px;
+  image-rendering:pixelated;
+}
+
+/* Shadow */
+#char-shadow{
+  position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  width:32px;height:8px;
+  background:rgba(0,0,0,.4);
+  border-radius:50%;
+}
+
+/* Character canvas */
+#charCanvas{
+  width:48px;height:64px;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+}
+
+/* Speech bubble */
+#bubble{
+  position:absolute;
+  bottom:70px;left:-20px;
+  min-width:240px;max-width:320px;
+  background:#fff;
+  border:3px solid #111;
+  padding:12px 14px;
+  display:none;
+  z-index:30;
+  image-rendering:pixelated;
+}
+#bubble::after{
+  content:'';
+  position:absolute;bottom:-12px;left:30px;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-top:12px solid #fff;
+}
+#bubble::before{
+  content:'';
+  position:absolute;bottom:-15px;left:28px;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-top:14px solid #111;
+}
+#bubble-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:7px;color:#111;
+  margin-bottom:8px;
+  line-height:1.4;
+}
+#bubble-body{
+  font-size:14px;color:#333;
+  line-height:1.5;
+}
+#bubble-body a{color:#6650a4;text-decoration:none;}
+#bubble-close{
+  position:absolute;top:6px;right:8px;
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:#fff;background:#cc2222;border:2px solid #ff4444;
+  cursor:pointer;padding:3px 8px;
+  line-height:1;
+  border-radius:0;
+}
+#bubble-close:hover{background:#ff0000;}
+
+/* Typing cursor */
+.type-cursor{
+  display:inline-block;width:2px;
+  height:.9em;background:#111;
+  animation:blink .7s infinite;
+  vertical-align:text-bottom;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── HUD ── */
+#hud{
+  position:fixed;top:0;left:0;right:0;
+  padding:12px 20px;
+  display:flex;justify-content:space-between;align-items:center;
+  z-index:50;
+  background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 100%);
+  pointer-events:none;
+}
+#hud-left{pointer-events:all;}
+#hud-name{
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;color:#7fff7f;
+  text-shadow:0 0 8px #7fff7f;
+  line-height:1.6;
+}
+#hud-role{font-size:13px;color:#aaffaa;margin-top:2px;}
+#hud-right{display:flex;gap:8px;pointer-events:all;}
+
+/* HP / XP bars */
+#stats{margin-top:4px;display:flex;flex-direction:column;gap:3px;}
+.bar-row{display:flex;align-items:center;gap:6px;}
+.bar-label{font-family:'Press Start 2P',monospace;font-size:6px;color:#ccc;min-width:20px;}
+.bar-track{width:80px;height:8px;background:#222;border:1px solid #444;}
+.bar-fill{height:100%;transition:width .5s;}
+.hp-fill{background:linear-gradient(90deg,#ff4444,#ff8888);}
+.xp-fill{background:linear-gradient(90deg,#4488ff,#88bbff);}
+
+/* NAV BUTTONS */
+.nav-btn{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:8px 10px;
+  background:rgba(0,0,0,.7);
+  border:2px solid #555;
+  color:#ccc;cursor:pointer;
+  transition:all .15s;
+  line-height:1.4;
+  text-align:center;
+}
+.nav-btn:hover,.nav-btn.active{
+  background:rgba(255,255,255,.1);
+  border-color:#7fff7f;color:#7fff7f;
+  text-shadow:0 0 6px #7fff7f;
+}
+
+/* ── SECTION PANELS ── */
+#panel{
+  position:fixed;
+  right:0;top:0;bottom:0;
+  width:400px;
+  background:rgba(10,10,25,.95);
+  border-left:3px solid #333;
+  z-index:40;
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.23,1,.32,1);
+  overflow:hidden;
+}
+#panel.open{transform:translateX(0);}
+#panel-header{
+  padding:16px 20px;
+  border-bottom:2px solid #333;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-shrink:0;
+}
+#panel-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;color:#7fff7f;
+  text-shadow:0 0 8px #7fff7f;
+}
+#panel-close{
+  font-family:'Press Start 2P',monospace;font-size:11px;
+  background:rgba(255,60,60,.15);border:2px solid #f44;
+  color:#f44;cursor:pointer;padding:8px 14px;
+  transition:all .15s;
+  flex-shrink:0;
+}
+#panel-close:hover{background:#f44;color:#fff;border-color:#f44;}
+#panel-body{
+  padding:20px;overflow-y:auto;flex:1;
+  scrollbar-width:thin;scrollbar-color:#333 transparent;
+  touch-action:pan-y;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Panel content blocks */
+.p-section{margin-bottom:24px;}
+.p-label{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:#888;letter-spacing:.1em;margin-bottom:10px;
+}
+.p-title{
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:#7fff7f;line-height:1.6;margin-bottom:6px;
+}
+.p-text{font-size:15px;color:#bbb;line-height:1.6;margin-bottom:6px;}
+.p-text a{color:#88bbff;}
+.p-text strong{color:#fff;}
+.p-divider{border:none;border-top:1px solid #222;margin:16px 0;}
+
+/* Skill bars in panel */
+.skill-row{margin-bottom:10px;}
+.skill-name{font-size:14px;color:#ccc;margin-bottom:3px;}
+.skill-track{height:6px;background:#222;border:1px solid #333;}
+.skill-fill{height:100%;background:linear-gradient(90deg,#7fff7f,#4dbb4d);transition:width 1s;}
+
+/* Timeline */
+.tl-item{
+  padding:10px 0 10px 16px;
+  border-left:2px solid #333;
+  position:relative;margin-bottom:4px;
+}
+.tl-item::before{
+  content:'▶';font-size:10px;
+  color:#7fff7f;
+  position:absolute;left:-8px;top:12px;
+  background:#0f0f1a;padding:2px 0;
+}
+.tl-date{font-family:'Press Start 2P',monospace;font-size:6px;color:#7fff7f;margin-bottom:4px;}
+.tl-title{font-size:15px;color:#fff;margin-bottom:2px;}
+.tl-place{font-size:13px;color:#888;margin-bottom:4px;}
+.tl-desc{font-size:13px;color:#aaa;line-height:1.5;}
+
+/* Contact links */
+.contact-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid #222;
+  font-size:15px;color:#ccc;text-decoration:none;
+  transition:color .15s;
+}
+.contact-row:hover{color:#7fff7f;}
+.contact-row:last-child{border-bottom:none;}
+.c-icon{font-size:18px;min-width:24px;}
+
+/* Project card in panel */
+.proj-card{
+  border:1px solid #333;padding:12px;
+  margin-bottom:10px;
+  transition:border-color .15s;cursor:default;
+}
+.proj-card:hover{border-color:#7fff7f;}
+.proj-name{font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;margin-bottom:6px;}
+.proj-desc{font-size:13px;color:#999;line-height:1.5;margin-bottom:8px;}
+.proj-link{
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  color:#88bbff;text-decoration:none;
+  border-bottom:1px solid #88bbff;padding-bottom:1px;
+}
+.proj-link:hover{color:#aaccff;}
+
+/* Tags */
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.tag{
+  font-family:'Press Start 2P',monospace;font-size:5px;
+  padding:3px 6px;border:1px solid #444;color:#888;
+}
+
+/* ── GROUND OBJECTS ── */
+.ground-obj{
+  position:absolute;
+  z-index:15;pointer-events:all;
+  animation:float 2.5s ease-in-out infinite;
+  cursor:pointer;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.obj-label{
+  font-family:'Press Start 2P',monospace;
+  font-size:6px;color:#ffcc00;
+  text-align:center;margin-bottom:4px;
+  text-shadow:0 0 6px #ffcc00, 0 0 12px #ff8800;
+  opacity:0;transition:opacity .2s;
+  white-space:nowrap;
+}
+.ground-obj:hover .obj-label{opacity:1;}
+/* Always show labels on mobile */
+@media(max-width:700px){
+  .obj-label{opacity:.7;font-size:5px;}
+}
+
+/* ── PIXEL ART SVG WRAPPERS ── */
+.pixel-obj{image-rendering:pixelated;}
+
+/* ── INSTRUCTIONS ── */
+#instructions{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:rgba(255,255,255,.4);
+  text-align:center;line-height:2;
+  pointer-events:none;
+  transition:opacity 1s;
+}
+
+/* ── BIRDS ── */
+.bird{
+  position:absolute;
+  pointer-events:none;
+  z-index:18;
+  image-rendering:pixelated;
+}
+/* ── LIVES HUD ── */
+#lives-hud{
+  position:fixed;top:90px;left:20px;
+  z-index:55;
+  display:flex;gap:6px;align-items:center;
+}
+.life-icon{
+  font-size:16px;
+  transition:all .2s;
+  filter:drop-shadow(0 0 4px #ff4444);
+}
+.life-icon.lost{
+  opacity:.2;
+  filter:none;
+}
+#lives-label{
+  font-family:'Press Start 2P',monospace;
+  font-size:6px;color:#ff8888;margin-right:4px;
+}
+
+/* ── GAME OVER / REVIVAL ── */
+#gameover{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.92);
+  z-index:200;
+  display:none;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;
+  padding:20px;
+}
+#gameover.show{display:flex;}
+#go-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:28px;color:#ff4444;
+  text-shadow:0 0 20px #ff4444;
+  animation:goflash .5s infinite alternate;
+  text-align:center;
+}
+@keyframes goflash{from{opacity:1}to{opacity:.4}}
+#go-sub{
+  font-family:'Press Start 2P',monospace;
+  font-size:10px;color:#ccc;line-height:2;text-align:center;
+  max-width:360px;
+}
+#go-btn{
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  padding:14px 28px;
+  background:#7fff7f;color:#0a0a0a;
+  border:none;cursor:pointer;
+  animation:gobtn .8s infinite alternate;
+  width:100%;max-width:280px;
+}
+@keyframes gobtn{from{transform:scale(1)}to{transform:scale(1.04)};}
+#go-btn:hover{background:#fff;}
+#go-wa{
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  padding:14px 28px;
+  background:#25D366;color:#fff;
+  border:2px solid #128C7E;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  text-decoration:none;
+  width:100%;max-width:280px;
+  transition:background .2s;
+  line-height:1.6;
+  text-align:center;
+}
+#go-wa:hover{background:#128C7E;}
+
+/* ── HIT FLASH ── */
+@keyframes hit-flash{
+  0%{filter:brightness(10) saturate(0)}
+  100%{filter:none}
+}
+.hit{animation:hit-flash .4s ease-out;}
+
+/* ── SCORE ── */
+#score-hud{
+  position:fixed;top:90px;right:20px;
+  z-index:55;
+  font-family:'Press Start 2P',monospace;
+  font-size:7px;color:#ffcc00;
+  text-align:right;line-height:2;
+}
+
+/* ── STAR POPUP multiline ── */
+#star-popup{
+  line-height:1.9;
+}
+
+/* ── MUSIC PLAYER ── */
+#music-player{
+  position:fixed;bottom:20px;right:20px;
+  z-index:60;
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+}
+#music-btn{
+  width:44px;height:44px;
+  background:rgba(0,0,0,.8);
+  border:2px solid #555;
+  color:#ccc;font-size:18px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+  position:relative;
+}
+#music-btn:hover{border-color:#7fff7f;color:#7fff7f;}
+#music-btn.playing{border-color:#7fff7f;color:#7fff7f;}
+#music-btn.playing::after{
+  content:'';
+  position:absolute;inset:-4px;
+  border:2px solid #7fff7f;
+  animation:pulse-ring 1.5s infinite;
+}
+@keyframes pulse-ring{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+#music-icon{display:inline-block;}
+#music-btn.playing #music-icon{animation:spin 2s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+#music-track-card{
+  background:rgba(0,0,0,.88);border:2px solid #333;
+  padding:10px 14px;max-width:260px;
+  opacity:0;transform:translateY(8px) scale(.96);
+  transition:all .3s cubic-bezier(.23,1,.32,1);pointer-events:none;
+}
+#music-track-card.show{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+#track-label{font-family:'Press Start 2P',monospace;font-size:6px;color:#555;letter-spacing:.1em;margin-bottom:6px;}
+#track-name{font-family:'Press Start 2P',monospace;font-size:8px;color:#7fff7f;line-height:1.6;margin-bottom:3px;text-shadow:0 0 8px #7fff7f44;}
+#track-artist{font-size:13px;color:#aaa;margin-bottom:8px;}
+#track-bar{height:3px;background:#222;border:1px solid #333;overflow:hidden;}
+#track-progress{height:100%;background:linear-gradient(90deg,#7fff7f,#4dbb4d);width:0%;transition:width .5s linear;}
+#track-time{font-family:'Press Start 2P',monospace;font-size:5px;color:#555;margin-top:4px;display:flex;justify-content:space-between;}
+
+.star-ripple{
+  position:fixed;border-radius:50%;border:2px solid rgba(255,255,255,.6);
+  pointer-events:none;transform:scale(0);
+  animation:ripple-out .6s ease-out forwards;z-index:9998;
+}
+@keyframes ripple-out{0%{transform:scale(0);opacity:1}100%{transform:scale(1);opacity:0}}
+
+#star-popup{
+  position:fixed;font-family:'Press Start 2P',monospace;
+  font-size:7px;color:#fff;
+  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.2);
+  padding:7px 12px;pointer-events:none;opacity:0;
+  white-space:nowrap;z-index:9997;transition:opacity .3s;
+}
+#star-popup.show{opacity:1;}
+
+/* ── JUMP ANIMATION ── */
+@keyframes jump{
+  0%{bottom:68px}30%{bottom:140px}60%{bottom:68px}80%{bottom:85px}100%{bottom:68px}
+}
+.jumping{animation:jump .5s ease-out forwards!important;}
+
+/* ── NOTIFICATION TOAST ── */
+#toast{
+  position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:rgba(0,0,0,.85);border:2px solid #7fff7f;
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:#7fff7f;padding:8px 16px;
+  opacity:0;transition:all .3s;
+  pointer-events:none;z-index:60;
+  white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── MOBILE ── */
+#mobile-controls{
+  display:none;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:80px;
+  z-index:55;
+  pointer-events:none;
+}
+/* Left side: ◀ ▶ */
+#mob-dpad{
+  position:absolute;
+  left:12px;bottom:12px;
+  display:flex;gap:8px;
+  pointer-events:all;
+}
+/* Right side: ▲ jump */
+#mob-actions{
+  position:absolute;
+  right:12px;bottom:12px;
+  display:flex;gap:8px;
+  pointer-events:all;
+}
+.mob-btn{
+  width:64px;height:64px;
+  background:rgba(0,0,0,.75);
+  border:2px solid #555;
+  font-size:22px;color:#ccc;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  touch-action:none;
+  border-radius:4px;
+}
+.mob-btn:active{background:rgba(127,255,127,.25);border-color:#7fff7f;color:#7fff7f;}
+#mob-jump{background:rgba(0,80,0,.75);border-color:#7fff7f;color:#7fff7f;width:72px;height:72px;font-size:26px;}
+
+/* Mobile info bar — tap icons instead of proximity walk */
+#mob-info-bar{
+  display:none;
+  position:fixed;
+  top:56px;left:0;right:0;
+  z-index:55;
+  overflow-x:auto;
+  background:rgba(0,0,0,.7);
+  border-bottom:2px solid #333;
+  padding:6px 10px;
+  gap:8px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  white-space:nowrap;
+}
+#mob-info-bar::-webkit-scrollbar{display:none;}
+.mob-info-btn{
+  display:inline-flex;
+  align-items:center;gap:6px;
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:#ccc;
+  background:rgba(255,255,255,.06);
+  border:1px solid #444;
+  padding:7px 12px;
+  cursor:pointer;
+  white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.mob-info-btn:active{background:rgba(127,255,127,.15);border-color:#7fff7f;color:#7fff7f;}
+
+@media(max-width:700px){
+  #mobile-controls{display:block;}
+  #mob-info-bar{display:flex;}
+  /* Hide desktop nav since info bar replaces it on mobile */
+  #hud-right{display:none;}
+  #panel{width:100%;border-left:none;border-top:3px solid #333;}
+  /* HUD slim */
+  #hud{padding:6px 10px;gap:4px;}
+  #hud-name{font-size:7px;}
+  #hud-role{font-size:11px;}
+  .bar-track{width:55px;}
+  #hud-left{display:flex;flex-direction:column;gap:2px;}
+  /* Move lives/score above controls */
+  #lives-hud{top:auto;bottom:88px;left:50%;transform:translateX(-50%);flex-direction:row;}
+  #lives-label{display:none;}
+  #score-hud{display:none;}/* hidden on mobile, shown in HUD area */
+  /* Music player above controls */
+  #music-player{bottom:88px;right:10px;}
+  #music-track-card{max-width:200px;}
+  /* Game over */
+  #go-title{font-size:18px;}
+  #go-sub{font-size:7px;}
+  #go-btn{font-size:8px;padding:12px 20px;}
+  #go-wa{font-size:8px;padding:12px 20px;}
+  /* Toast higher */
+  #toast{font-size:6px;padding:6px 10px;top:110px;}
+  #instructions{bottom:90px;font-size:5px;}
+  /* Bubble repositioned above controls */
+  #bubble{bottom:90px;}
+}
+@media(max-width:480px){
+  #hud-name{font-size:6px;}
+  #hud-role{display:none;}
+  #go-title{font-size:14px;}
+  .mob-btn{width:60px;height:60px;font-size:20px;}
+  #mob-jump{width:68px;height:68px;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<!-- WORLD -->
+<div id="world">
+  <div id="sky"></div>
+  <canvas id="stars-canvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <div id="moon"></div>
+
+  <!-- Parallax far layer -->
+  <div id="layer-far">
+    <svg class="mountains" id="mtn-far" viewBox="0 0 1600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="position:absolute;bottom:160px;width:100%;height:200px;">
+      <polygon points="0,200 120,60 240,200 360,40 480,200 600,80 720,200 840,30 960,200 1080,70 1200,200 1320,50 1440,200 1600,90 1600,200" fill="#1a1535" opacity=".6"/>
+    </svg>
+  </div>
+
+  <!-- Parallax mid layer -->
+  <div id="layer-mid">
+    <svg class="mountains" id="mtn-mid" viewBox="0 0 1600 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="position:absolute;bottom:110px;width:100%;height:160px;">
+      <polygon points="0,160 80,50 160,160 280,20 400,160 520,60 640,160 760,35 880,160 1000,55 1120,160 1240,30 1360,160 1480,65 1600,160" fill="#231845"/>
+    </svg>
+  </div>
+
+  <div id="ground-back"></div>
+  <div id="ground-mid"></div>
+  <div id="ground"></div>
+  <div id="road"></div>
+
+  <!-- Interactive objects on the ground -->
+  <div class="ground-obj" id="obj-about" style="left:22%;bottom:130px;" onclick="openSection('about')">
+    <div class="obj-label">[ SOBRE MÍ ]</div>
+    <svg width="40" height="48" viewBox="0 0 40 48" style="image-rendering:pixelated;">
+      <!-- Mailbox pixel art -->
+      <rect x="14" y="4" width="16" height="4" fill="#cc3333"/>
+      <rect x="10" y="8" width="24" height="24" fill="#dd4444"/>
+      <rect x="10" y="8" width="24" height="4" fill="#bb2222"/>
+      <rect x="17" y="16" width="10" height="8" fill="#992222"/>
+      <rect x="20" y="18" width="4" height="3" fill="#ffaa00"/>
+      <rect x="18" y="32" width="4" height="16" fill="#888"/>
+      <rect x="14" y="44" width="12" height="4" fill="#666"/>
+    </svg>
+  </div>
+  <!-- Platform pole for obj-about -->
+  <div style="position:absolute;left:calc(22% + 15px);bottom:62px;width:8px;height:70px;background:repeating-linear-gradient(180deg,#555 0,#555 4px,#333 4px,#333 8px);pointer-events:none;z-index:14;"></div>
+  <div style="position:absolute;left:calc(22% + 4px);bottom:130px;width:30px;height:6px;background:#666;border-top:2px solid #888;pointer-events:none;z-index:14;"></div>
+
+  <div class="ground-obj" id="obj-exp" style="left:38%;bottom:130px;" onclick="openSection('exp')">
+    <div class="obj-label">[ EXPERIENCIA ]</div>
+    <svg width="44" height="52" viewBox="0 0 44 52" style="image-rendering:pixelated;">
+      <!-- Briefcase pixel art -->
+      <rect x="10" y="4" width="24" height="4" fill="#885522"/>
+      <rect x="8" y="8" width="28" height="28" fill="#aa6633"/>
+      <rect x="8" y="8" width="28" height="4" fill="#cc8844"/>
+      <rect x="6" y="4" width="4" height="8" fill="#885522"/>
+      <rect x="34" y="4" width="4" height="8" fill="#885522"/>
+      <rect x="8" y="20" width="28" height="4" fill="#885522"/>
+      <rect x="18" y="18" width="8" height="8" fill="#cc8844"/>
+      <rect x="20" y="20" width="4" height="4" fill="#ffcc00"/>
+    </svg>
+  </div>
+  <div style="position:absolute;left:calc(38% + 17px);bottom:62px;width:8px;height:70px;background:repeating-linear-gradient(180deg,#555 0,#555 4px,#333 4px,#333 8px);pointer-events:none;z-index:14;"></div>
+  <div style="position:absolute;left:calc(38% + 4px);bottom:130px;width:34px;height:6px;background:#666;border-top:2px solid #888;pointer-events:none;z-index:14;"></div>
+
+  <div class="ground-obj" id="obj-skills" style="left:54%;bottom:130px;" onclick="openSection('skills')">
+    <div class="obj-label">[ HABILIDADES ]</div>
+    <svg width="44" height="52" viewBox="0 0 44 52" style="image-rendering:pixelated;">
+      <!-- Computer pixel art -->
+      <rect x="4" y="4" width="36" height="28" fill="#225588"/>
+      <rect x="4" y="4" width="36" height="4" fill="#3366aa"/>
+      <rect x="8" y="10" width="28" height="18" fill="#111a2e"/>
+      <rect x="10" y="12" width="16" height="2" fill="#00ff88"/>
+      <rect x="10" y="16" width="10" height="2" fill="#00ff88"/>
+      <rect x="10" y="20" width="14" height="2" fill="#00ff88"/>
+      <rect x="10" y="24" width="8" height="2" fill="#00ff88"/>
+      <rect x="18" y="32" width="8" height="8" fill="#3366aa"/>
+      <rect x="12" y="40" width="20" height="4" fill="#225588"/>
+    </svg>
+  </div>
+  <div style="position:absolute;left:calc(54% + 17px);bottom:62px;width:8px;height:70px;background:repeating-linear-gradient(180deg,#555 0,#555 4px,#333 4px,#333 8px);pointer-events:none;z-index:14;"></div>
+  <div style="position:absolute;left:calc(54% + 4px);bottom:130px;width:34px;height:6px;background:#666;border-top:2px solid #888;pointer-events:none;z-index:14;"></div>
+
+  <div class="ground-obj" id="obj-projects" style="left:70%;bottom:130px;" onclick="openSection('projects')">
+    <div class="obj-label">[ PROYECTOS ]</div>
+    <svg width="44" height="52" viewBox="0 0 44 52" style="image-rendering:pixelated;">
+      <!-- Rocket pixel art -->
+      <rect x="18" y="0" width="8" height="4" fill="#ff6622"/>
+      <rect x="14" y="4" width="16" height="8" fill="#ff8844"/>
+      <rect x="12" y="12" width="20" height="16" fill="#ffaa66"/>
+      <rect x="16" y="16" width="12" height="8" fill="#1155cc"/>
+      <rect x="18" y="18" width="8" height="4" fill="#88ccff"/>
+      <rect x="8" y="24" width="8" height="8" fill="#ff6622"/>
+      <rect x="28" y="24" width="8" height="8" fill="#ff6622"/>
+      <rect x="14" y="28" width="16" height="4" fill="#cc5500"/>
+      <rect x="16" y="32" width="12" height="6" fill="#ff8800"/>
+      <rect x="18" y="36" width="4" height="4" fill="#ffcc00"/>
+      <rect x="22" y="36" width="4" height="4" fill="#ffaa00"/>
+    </svg>
+  </div>
+  <div style="position:absolute;left:calc(70% + 17px);bottom:62px;width:8px;height:70px;background:repeating-linear-gradient(180deg,#555 0,#555 4px,#333 4px,#333 8px);pointer-events:none;z-index:14;"></div>
+  <div style="position:absolute;left:calc(70% + 4px);bottom:130px;width:34px;height:6px;background:#666;border-top:2px solid #888;pointer-events:none;z-index:14;"></div>
+
+  <div class="ground-obj" id="obj-contact" style="left:85%;bottom:130px;" onclick="openSection('contact')">
+    <div class="obj-label">[ CONTACTO ]</div>
+    <svg width="44" height="52" viewBox="0 0 44 52" style="image-rendering:pixelated;">
+      <!-- Phone booth pixel art -->
+      <rect x="8" y="0" width="28" height="48" fill="#cc2222"/>
+      <rect x="8" y="0" width="28" height="4" fill="#ee3333"/>
+      <rect x="12" y="8" width="20" height="24" fill="#aaddff"/>
+      <rect x="12" y="8" width="20" height="4" fill="#99ccee"/>
+      <rect x="20" y="0" width="4" height="6" fill="#ffcc00"/>
+      <rect x="14" y="36" width="8" height="12" fill="#bb1111"/>
+      <rect x="22" y="36" width="8" height="12" fill="#bb1111"/>
+      <rect x="18" y="38" width="8" height="8" fill="#880000"/>
+    </svg>
+  </div>
+  <div style="position:absolute;left:calc(85% + 17px);bottom:62px;width:8px;height:70px;background:repeating-linear-gradient(180deg,#555 0,#555 4px,#333 4px,#333 8px);pointer-events:none;z-index:14;"></div>
+  <div style="position:absolute;left:calc(85% + 4px);bottom:130px;width:34px;height:6px;background:#666;border-top:2px solid #888;pointer-events:none;z-index:14;"></div>
+
+  <!-- Trees decorative -->
+  <svg style="position:absolute;bottom:62px;left:6%;pointer-events:none;" width="28" height="44" viewBox="0 0 28 44" xmlns="http://www.w3.org/2000/svg" image-rendering="pixelated">
+    <rect x="12" y="28" width="4" height="16" fill="#5a3a1a"/>
+    <rect x="8" y="16" width="12" height="16" fill="#2d7a2d"/>
+    <rect x="4" y="8" width="20" height="12" fill="#339933"/>
+    <rect x="8" y="2" width="12" height="8" fill="#44aa44"/>
+    <rect x="10" y="0" width="8" height="4" fill="#55bb55"/>
+  </svg>
+
+  <svg style="position:absolute;bottom:62px;left:14%;pointer-events:none;" width="20" height="36" viewBox="0 0 20 36" xmlns="http://www.w3.org/2000/svg" image-rendering="pixelated">
+    <rect x="8" y="24" width="4" height="12" fill="#5a3a1a"/>
+    <rect x="4" y="12" width="12" height="14" fill="#2d7a2d"/>
+    <rect x="6" y="6" width="8" height="8" fill="#44aa44"/>
+    <rect x="8" y="2" width="4" height="6" fill="#55bb55"/>
+  </svg>
+
+  <svg style="position:absolute;bottom:62px;right:4%;pointer-events:none;" width="32" height="48" viewBox="0 0 32 48" xmlns="http://www.w3.org/2000/svg" image-rendering="pixelated">
+    <rect x="14" y="32" width="4" height="16" fill="#5a3a1a"/>
+    <rect x="8" y="18" width="16" height="16" fill="#1a6b1a"/>
+    <rect x="4" y="8" width="24" height="14" fill="#228b22"/>
+    <rect x="8" y="2" width="16" height="8" fill="#339933"/>
+    <rect x="12" y="0" width="8" height="4" fill="#44aa44"/>
+  </svg>
+
+  <!-- Character -->
+  <div id="char-wrap">
+    <div id="character">
+      <canvas id="charCanvas" width="48" height="64"></canvas>
+    </div>
+    <div id="char-shadow"></div>
+    <div id="bubble">
+      <button id="bubble-close" onclick="closeBubble()">✕</button>
+      <div id="bubble-title"></div>
+      <div id="bubble-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-left">
+    <div id="hud-name">LUIS CRUZ</div>
+    <div id="hud-role">Front-End Dev & Designer · Oaxaca 🌵</div>
+    <div id="stats">
+      <div class="bar-row">
+        <span class="bar-label">HP</span>
+        <div class="bar-track"><div class="bar-fill hp-fill" style="width:88%"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">XP</span>
+        <div class="bar-track"><div class="bar-fill xp-fill" style="width:70%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div id="hud-right">
+    <button class="nav-btn" onclick="openSection('about')">SOBRE<br>MÍ</button>
+    <button class="nav-btn" onclick="openSection('exp')">EXP</button>
+    <button class="nav-btn" onclick="openSection('skills')">SKILLS</button>
+    <button class="nav-btn" onclick="openSection('projects')">PROYS</button>
+    <button class="nav-btn" onclick="openSection('contact')">CONTACTO</button>
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div id="panel">
+  <div id="panel-header">
+    <span id="panel-title">—</span>
+    <button id="panel-close" onclick="closePanel()">✕ CERRAR</button>
+  </div>
+  <div id="panel-body"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- LIVES -->
+<div id="lives-hud">
+  <span id="lives-label">VIDAS</span>
+  <span class="life-icon" id="life-1">❤️</span>
+  <span class="life-icon" id="life-2">❤️</span>
+  <span class="life-icon" id="life-3">❤️</span>
+</div>
+
+<!-- SCORE -->
+<div id="score-hud">
+  <div id="score-val">SCORE: 0</div>
+  <div id="birds-val">AVES: 0</div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameover">
+  <div id="go-title">GAME OVER</div>
+  <div id="go-sub">¡Una ave derrotó a Luis Cruz!<br><br><span id="go-score" style="color:#ffcc00"></span></div>
+  <button id="go-btn" onclick="revive()">[ ► CONTINUAR ]</button>
+  <a id="go-wa"
+     href="https://wa.me/522204891875?text=¡Hola%20Wicho!%20Vi%20tu%20portafolio%20y%20quiero%20contactarte%20🌵"
+     target="_blank">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    [ CONTACTAR POR WHATSAPP ]
+  </a>
+</div>
+
+<!-- STAR POPUP -->
+<div id="star-popup"></div>
+
+<!-- MUSIC PLAYER -->
+<div id="music-player">
+  <div id="music-track-card">
+    <div id="track-label">♪ NOW PLAYING</div>
+    <div id="track-name">LOADING...</div>
+    <div id="track-artist"></div>
+    <div id="track-bar"><div id="track-progress"></div></div>
+    <div id="track-time"><span id="track-cur">0:00</span><span id="track-dur">0:00</span></div>
+  </div>
+  <button id="music-btn" onclick="toggleMusic()" title="Toggle music">
+    <span id="music-icon">♪</span>
+  </button>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+  ← → MOVER &nbsp;|&nbsp; SPACE SALTAR &nbsp;|&nbsp; 🐦 ESQUIVA AVES &nbsp;|&nbsp; ✦ CLICK CIELO = CAMBIAR CANCIÓN
+</div>
+
+<!-- MOBILE INFO BAR (tap to open sections without walking) -->
+<div id="mob-info-bar">
+  <button class="mob-info-btn" onclick="openSection('about')">👤 SOBRE MÍ</button>
+  <button class="mob-info-btn" onclick="openSection('exp')">💼 EXPERIENCIA</button>
+  <button class="mob-info-btn" onclick="openSection('skills')">⚡ SKILLS</button>
+  <button class="mob-info-btn" onclick="openSection('projects')">🚀 PROYECTOS</button>
+  <button class="mob-info-btn" onclick="openSection('contact')">📞 CONTACTO</button>
+</div>
+
+<!-- MOBILE CONTROLS -->
+<div id="mobile-controls">
+  <div id="mob-dpad">
+    <button class="mob-btn" id="mob-left">◀</button>
+    <button class="mob-btn" id="mob-right">▶</button>
+  </div>
+  <div id="mob-actions">
+    <button class="mob-btn" id="mob-jump">▲</button>
+  </div>
+</div>
+
+<script>
+// ── CURSOR ──────────────────────────────────
+const curEl = document.getElementById('cur');
+document.addEventListener('mousemove', e => {
+  curEl.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+});
+
+// ── STARS ───────────────────────────────────
+(function(){
+  const c = document.getElementById('stars-canvas');
+  c.width = window.innerWidth; c.height = window.innerHeight;
+  const ctx = c.getContext('2d');
+  for(let i=0;i<160;i++){
+    const x=Math.random()*c.width, y=Math.random()*c.height*.65;
+    const s=Math.random()<.15?2:1;
+    ctx.fillStyle=`rgba(255,255,255,${.3+Math.random()*.7})`;
+    ctx.fillRect(Math.round(x),Math.round(y),s,s);
+  }
+})();
+
+// ── PIXEL CHARACTER ─────────────────────────
+const canvas = document.getElementById('charCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const SKIN  = '#f4c07e';
+const HAIR  = '#1a0a00';
+const SHIRT = '#4488cc';
+const PANTS = '#2d3a7a';
+const SHOES = '#1a1a1a';
+const EYES  = '#1a1a1a';
+const MOUTH = '#cc6644';
+
+// Frame: array of colored pixel rects [x,y,w,h,color]
+function drawFrame(frameIdx, dir, isRunning) {
+  ctx.clearRect(0, 0, 48, 64);
+  const scale = 2;
+  const px = (x,y,w,h,c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(x*scale, y*scale, w*scale, h*scale);
+  };
+
+  // Leg offsets for walking animation
+  const legAnim = [0,1,0,-1];
+  const legOff = isRunning ? legAnim[frameIdx % 4] * 2 : 0;
+  const armAnim = [1,0,-1,0];
+  const armOff = isRunning ? armAnim[frameIdx % 4] * 2 : 0;
+
+  // Facing direction flip
+  const flip = dir < 0;
+  if(flip){
+    ctx.save();
+    ctx.scale(-1,1);
+    ctx.translate(-48,0);
+  }
+
+  // Body (torso)
+  px(10,14, 12,10, SHIRT);
+  // Collar
+  px(13,14, 2,2, SKIN);
+  px(17,14, 2,2, SKIN);
+  // Belt
+  px(10,23, 12,2, '#cc9900');
+  px(14,23, 4,2, '#ffcc00');
+
+  // Arms
+  px(7, 14+armOff, 3,8, SHIRT);   // left arm
+  px(22,14-armOff, 3,8, SHIRT);   // right arm
+  // Hands
+  px(7, 22+armOff, 3,3, SKIN);
+  px(22,22-armOff, 3,3, SKIN);
+
+  // Legs
+  px(10,25, 5,10, PANTS);   // left leg
+  px(15,25, 5,10, PANTS);   // right leg
+  // Leg movement
+  if(isRunning){
+    ctx.clearRect(10*scale,(25+Math.abs(legOff))*scale, 5*scale, 10*scale);
+    ctx.clearRect(15*scale,(25+Math.abs(legOff))*scale, 5*scale, 10*scale);
+    px(10-legOff, 25, 5, 10, PANTS);
+    px(15+legOff, 25, 5, 10, PANTS);
+  }
+  // Shoes
+  const lLeg = isRunning ? 10-legOff : 10;
+  const rLeg = isRunning ? 15+legOff : 15;
+  px(lLeg-1, 34, 7,3, SHOES);
+  px(rLeg-1, 34, 7,3, SHOES);
+
+  // Head
+  px(11,2, 10,12, SKIN);
+  // Hair top
+  px(11,2, 10,4, HAIR);
+  // Hair side
+  px(11,6, 2,4, HAIR);
+  // Eyes
+  px(13,8, 2,2, EYES);
+  px(17,8, 2,2, EYES);
+  // Mouth (smile)
+  px(14,12, 4,1, MOUTH);
+  // Ear
+  px(11,9, 1,3, SKIN);
+  px(20,9, 1,3, SKIN);
+
+  // Backpack
+  px(22,14, 3,10, '#995522');
+  px(23,16, 1,6, '#774411');
+
+  if(flip) ctx.restore();
+}
+
+// Idle bob
+let charFrame=0, charDir=1, charRunning=false;
+let charX=120, charVY=0, isOnGround=true;
+const GROUND_Y = 68;
+const GRAVITY = 1.2;
+const JUMP_FORCE = -22;
+const SPEED = 4;
+let frameTimer=0;
+const keys={left:false,right:false,space:false};
+
+// Initial draw
+drawFrame(0,1,false);
+
+// ── PROXIMITY TO OBJECTS ─────────────────────
+const OBJS = [
+  {id:'obj-about',   section:'about',    pct:.22, msg:'¡SALTA para abrir!'},
+  {id:'obj-exp',     section:'exp',      pct:.38, msg:'¡SALTA para abrir!'},
+  {id:'obj-skills',  section:'skills',   pct:.54, msg:'¡SALTA para abrir!'},
+  {id:'obj-projects',section:'projects', pct:.70, msg:'¡SALTA para abrir!'},
+  {id:'obj-contact', section:'contact',  pct:.85, msg:'¡SALTA para abrir!'},
+];
+let lastNear = null;
+function checkProximity(){
+  const ww = window.innerWidth;
+  const cw = document.getElementById('char-wrap');
+  const curBottom = parseInt(cw.style.bottom || 68);
+
+  for(const o of OBJS){
+    const ox = o.pct * ww;
+    const nearX = Math.abs(charX - ox) < 70;
+
+    if(nearX && isOnGround){
+      // Player is near but on ground — show hint
+      if(lastNear !== o.id + '_hint'){
+        lastNear = o.id + '_hint';
+        showBubble('[ ▲ SALTA ]', o.msg + '<br><small>Necesitas saltar para alcanzarlo</small>');
+      }
+      return;
+    }
+
+    if(nearX && !isOnGround && curBottom >= 110){
+      // Player is near AND elevated enough — open section
+      if(lastNear !== o.id){
+        lastNear = o.id;
+        openSection(o.section);
+        showBubble('[ ✓ ABIERTO ]', '¡Lo lograste! Revisa el panel →');
+      }
+      return;
+    }
+  }
+  if(lastNear){ lastNear=null; closeBubble(); }
+}
+
+// Walking loop
+function charLoop(){
+  frameTimer++;
+  const ww = window.innerWidth;
+
+  // Move
+  let moved = false;
+  if(keys.left){ charX -= SPEED; charDir=-1; moved=true; }
+  if(keys.right){ charX += SPEED; charDir=1; moved=true; }
+  charX = Math.max(30, Math.min(ww - 80, charX));
+
+  // Gravity / jump
+  if(!isOnGround){ charVY += GRAVITY; }
+  let cw = document.getElementById('char-wrap');
+  let curBottom = parseInt(cw.style.bottom||68);
+  curBottom -= charVY;
+  if(curBottom <= GROUND_Y){ curBottom=GROUND_Y; charVY=0; isOnGround=true; }
+  cw.style.bottom = curBottom+'px';
+  cw.style.left = charX+'px';
+
+  charRunning = moved;
+  if(frameTimer%8===0){ charFrame++; }
+  drawFrame(charFrame, charDir, charRunning && isOnGround);
+
+  // Parallax
+  const px = charX / ww;
+  document.getElementById('layer-far').style.transform = `translateX(${-(charX*.1)}px)`;
+  document.getElementById('layer-mid').style.transform = `translateX(${-(charX*.22)}px)`;
+
+  // Ground objects proximity check
+  checkProximity();
+
+  requestAnimationFrame(charLoop);
+}
+
+function doJump(){
+  if(isOnGround){ charVY = JUMP_FORCE; isOnGround=false; playJumpSound(); }
+}
+
+charLoop();
+
+// ── KEYBOARD ─────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowLeft'||e.key==='a') keys.left=true;
+  if(e.key==='ArrowRight'||e.key==='d') keys.right=true;
+  if((e.key===' '||e.key==='ArrowUp'||e.key==='w')&&isOnGround){ doJump(); e.preventDefault(); }
+});
+document.addEventListener('keyup', e => {
+  if(e.key==='ArrowLeft'||e.key==='a') keys.left=false;
+  if(e.key==='ArrowRight'||e.key==='d') keys.right=false;
+});
+
+// ── MOBILE TOUCH CONTROLS ────────────────────
+(function setupMobileControls(){
+  function addBtn(id, pressFn, releaseFn){
+    const el = document.getElementById(id);
+    if(!el) return;
+    // Touch
+    el.addEventListener('touchstart', e => { e.preventDefault(); pressFn(); }, {passive:false});
+    if(releaseFn){
+      el.addEventListener('touchend',   e => { e.preventDefault(); releaseFn(); }, {passive:false});
+      el.addEventListener('touchcancel',e => { e.preventDefault(); releaseFn(); }, {passive:false});
+    }
+    // Mouse (desktop testing)
+    el.addEventListener('mousedown', e => { e.preventDefault(); pressFn(); });
+    if(releaseFn){
+      el.addEventListener('mouseup',   e => { e.preventDefault(); releaseFn(); });
+      el.addEventListener('mouseleave',e => { e.preventDefault(); releaseFn(); });
+    }
+  }
+  addBtn('mob-left',  ()=>{ keys.left=true;  }, ()=>{ keys.left=false;  });
+  addBtn('mob-right', ()=>{ keys.right=true; }, ()=>{ keys.right=false; });
+  addBtn('mob-jump',  ()=>{ doJump(); },          null);
+})();
+// ── BUBBLE ───────────────────────────────────
+let typeInterval=null;
+function showBubble(title, html){
+  const b=document.getElementById('bubble');
+  document.getElementById('bubble-title').textContent=title;
+  document.getElementById('bubble-body').innerHTML=html;
+  b.style.display='block';
+}
+function closeBubble(){
+  document.getElementById('bubble').style.display='none';
+}
+
+// ── TOAST ────────────────────────────────────
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ── PANEL CONTENT ─────────────────────────────
+const SECTIONS = {
+  about:{
+    title:'// SOBRE MÍ',
+    html:`
+      <div class="p-section">
+        <div class="p-label">PERSONAJE</div>
+        <div class="p-title">Luis Alfonso Cruz Cueto</div>
+        <div class="p-text">aka <strong>Luis Cruz</strong></div>
+        <div class="p-text">Front-End Developer &amp; Designer</div>
+        <div class="p-text">📍 Oaxaca, México</div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">HISTORIA</div>
+        <div class="p-text">He crecido entre montañas y valles de Oaxaca. Mi mayor inspiración es mi gente, mi familia y las personas que me acompañan en este movimiento llamado carrera.</div>
+        <div class="p-text">Actualmente trabajo como <strong>freelancer</strong> con un laboratorio propio. Me levanto temprano, subo el cerro de <strong>Monte Albán</strong>, escucho música y audiolibros.</div>
+        <div class="p-text">Me considero protector de la naturaleza y defensor de ideas disruptivas que mejoran el lugar donde vivimos.</div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">STATS</div>
+        <div class="tags">
+          <span class="tag">HTML/CSS</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Diseño UI</span>
+          <span class="tag">Branding</span>
+          <span class="tag">Arduino</span>
+          <span class="tag">Linux</span>
+          <span class="tag">Robótica</span>
+          <span class="tag">Electrónica</span>
+          <span class="tag">Mecatrónica</span>
+        </div>
+      </div>`
+  },
+  exp:{
+    title:'// EXPERIENCIA',
+    html:`
+      <div class="p-section">
+        <div class="p-label">HISTORIAL DE MISIONES</div>
+        <div class="tl-item">
+          <div class="tl-date">2018 → PRESENTE</div>
+          <div class="tl-title">Freelancer</div>
+          <div class="tl-place">Laborall.club · Oaxaca</div>
+          <div class="tl-desc">Diseñador y desarrollador para Easa Huajuapan, Labstech POS, Taj Mahal y Construarts.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2017 → 2018</div>
+          <div class="tl-title">Jefe de Sistemas</div>
+          <div class="tl-place">Fábricas de Francia Oaxaca</div>
+          <div class="tl-desc">Gestión del área de informática en la apertura de la tienda departamental.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2015 → PRESENTE</div>
+          <div class="tl-title">Maestro de Robótica</div>
+          <div class="tl-place">Oaxhack HacerLab</div>
+          <div class="tl-desc">Espacio maker para prototipos, hardware y tecnología con poder local en Oaxaca.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2013 → 2015</div>
+          <div class="tl-title">Soporte Técnico</div>
+          <div class="tl-place">Punto PC Internet · Oaxaca</div>
+          <div class="tl-desc">Instalación de sistemas y soporte en las 6 sucursales del centro de Oaxaca.</div>
+        </div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">EDUCACIÓN</div>
+        <div class="tl-item">
+          <div class="tl-date">2012 → 2017 (TRUNCA)</div>
+          <div class="tl-title">Ingeniería Mecatrónica</div>
+          <div class="tl-place">Universidad Tecnológica de la Mixteca</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">2009 → 2012</div>
+          <div class="tl-title">Informático Económico</div>
+          <div class="tl-place">COBAO 01 Pueblo Nuevo</div>
+        </div>
+      </div>`
+  },
+  skills:{
+    title:'// HABILIDADES',
+    html:`
+      <div class="p-section">
+        <div class="p-label">ÁRBOL DE HABILIDADES</div>
+        <div class="skill-row"><div class="skill-name">Mantenimiento de PCs</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="95%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Diseño Web / UI</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="85%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Electrónica</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="80%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Sistemas Embebidos</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="75%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Aplicaciones Web</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="70%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Robótica</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="65%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Programación</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="60%"></div></div></div>
+        <div class="skill-row"><div class="skill-name">Sistemas Linux</div><div class="skill-track"><div class="skill-fill" style="width:0" data-w="45%"></div></div></div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">SERVICIOS DESBLOQUEADOS</div>
+        <div class="p-text">🎨 Diseño Web &amp; Branding</div>
+        <div class="p-text">⚙️ Desarrollo de Apps Web</div>
+        <div class="p-text">📊 Análisis de Datos</div>
+        <div class="p-text">📣 Marketing Web</div>
+        <div class="p-text">🛠️ Soporte Técnico Remoto</div>
+      </div>`
+  },
+  projects:{
+    title:'// PROYECTOS',
+    html:`
+      <div class="p-section">
+        <div class="p-label">MISIONES COMPLETADAS</div>
+        <div class="proj-card">
+          <div class="proj-name">PASTEL GHOST</div>
+          <div class="proj-desc">Juego.</div>
+          <a href="http://pastelghost.space" target="_blank" class="proj-link">↗ pastelghost.space</a>
+          <div class="tags"><span class="tag">Diseño Web</span><span class="tag">Freelancer</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-name">MENU OAXACA</div>
+          <div class="proj-desc">Menú Gastronómico de Oaxaca.</div>
+          <a href="https://menuoaxaca.com" target="_blank" class="proj-link">↗ menuoaxaca.com</a>
+          <div class="tags"><span class="tag">Desarrollo Web</span><span class="tag">Freelancer</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-name">ROBOTCSOS</div>
+          <div class="proj-desc">Tienda de robótica y tecnología maker.</div>
+          <a href="http://www.robotcsos.store" target="_blank" class="proj-link">↗ robotcsos.store</a>
+          <div class="tags"><span class="tag">Emprendimiento</span><span class="tag">Maker</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-name">OAXHACK</div>
+          <div class="proj-desc">Espacio maker en Oaxaca para construir prototipos y tecnología local.</div>
+          <a href="http://www.oaxhack.rf.gd" target="_blank" class="proj-link">↗ oaxhack.rf.gd</a>
+          <div class="tags"><span class="tag">Plataforma</span><span class="tag">Emprendimiento</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-name">TAJ MAHAL · RESTAURANTE</div>
+          <div class="proj-desc">Branding completo para restaurante indio en Oaxaca. Identidad visual y posicionamiento.</div>
+          <div class="tags"><span class="tag">Branding</span><span class="tag">Freelancer</span></div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-name">PROTECTOR S.O.S APP</div>
+          <div class="proj-desc">App de emergencias y seguridad asistida. En desarrollo desde feb. 2019.</div>
+          <div class="tags"><span class="tag">App</span><span class="tag">En desarrollo</span></div>
+        </div>
+      </div>`
+  },
+  contact:{
+    title:'// CONTACTO',
+    html:`
+      <div class="p-section">
+        <div class="p-label">CANALES DE COMUNICACIÓN</div>
+        <a href="mailto:aluiscueto1994@gmail.com" class="contact-row">
+          <span class="c-icon">✉️</span> aluiscueto1994@gmail.com
+        </a>
+        <a href="tel:+522204891875" class="contact-row">
+          <span class="c-icon">📞</span> +52 220 489 1875
+        </a>
+        <a href="http://www.menuoaxaca.com" target="_blank" class="contact-row">
+          <span class="c-icon">🌐</span> www.menuoaxaca.com
+        </a>
+        <a href="http://www.oaxhack.rf.gd" target="_blank" class="contact-row">
+          <span class="c-icon">🤖</span> oaxhack.rf.gd
+        </a>
+        <a href="https://wichoalph.github.io/" target="_blank" class="contact-row">
+          <span class="c-icon">📄</span> CV en línea
+        </a>
+        <div class="contact-row" style="cursor:default">
+          <span class="c-icon">📍</span> Oaxaca, México
+        </div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">ESTADO</div>
+        <div class="p-text" style="display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:8px;height:8px;background:#7fff7f;border-radius:50%;animation:blink .8s infinite;"></span>
+          Disponible para proyectos freelance y colaboraciones
+        </div>
+      </div>
+      <hr class="p-divider">
+      <div class="p-section">
+        <div class="p-label">ENVIAR MENSAJE</div>
+        <input id="cf-name" placeholder="Nombre" style="width:100%;background:#111;border:1px solid #333;color:#ccc;padding:8px;font-family:VT323,monospace;font-size:15px;margin-bottom:8px;outline:none;">
+        <input id="cf-email" placeholder="Email" style="width:100%;background:#111;border:1px solid #333;color:#ccc;padding:8px;font-family:VT323,monospace;font-size:15px;margin-bottom:8px;outline:none;">
+        <textarea id="cf-msg" placeholder="Mensaje..." rows="4" style="width:100%;background:#111;border:1px solid #333;color:#ccc;padding:8px;font-family:VT323,monospace;font-size:15px;resize:none;outline:none;margin-bottom:8px;"></textarea>
+        <button onclick="sendContact()" style="width:100%;background:#7fff7f;color:#111;border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;">[ ENVIAR MENSAJE ]</button>
+      </div>`
+  }
+};
+
+function openSection(key){
+  const s = SECTIONS[key];
+  if(!s) return;
+  document.getElementById('panel-title').textContent = s.title;
+  document.getElementById('panel-body').innerHTML = s.html;
+  document.getElementById('panel').classList.add('open');
+  closeBubble();
+  showToast('◆ ' + s.title.replace('// ',''));
+  // Animate skill bars after render
+  setTimeout(()=>{
+    document.querySelectorAll('#panel-body .skill-fill').forEach(f=>{
+      f.style.width = f.dataset.w;
+    });
+  }, 100);
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+}
+
+function sendContact(){
+  showToast('✓ MENSAJE ENVIADO!');
+  document.getElementById('cf-name').value='';
+  document.getElementById('cf-email').value='';
+  document.getElementById('cf-msg').value='';
+}
+
+// ── CHIPTUNE ENGINE (Web Audio API — sin archivos externos) ──────────────
+const TRACKS = [
+  { name: 'OAXACA NIGHT',     artist: 'Luis Cruz OST', bpm: 140, wave:'square',
+    melody:['E4','E4','R','E4','R','C4','E4','R','G4','R','R','G3','R','R','C4','R','G3','R','E3','R','A3','R','B3','R','Bb3','A3','R','G3','E4','G4','A4','R','F4','G4','R','E4','R','C4','D4','B3'],
+    bass:['C2','C2','G2','G2','A2','A2','F2','F2'] },
+  { name: 'PIXEL MONTAÑA',    artist: 'Luis Cruz OST', bpm: 120, wave:'sawtooth',
+    melody:['G4','G4','R','A4','G4','R','F4','G4','R','E4','R','D4','R','E4','F4','R','G4','R','A4','R','B4','R','C5','B4','A4','G4','F4','E4','D4','C4','R','G4','F4','E4','D4','C4','R','G3','R'],
+    bass:['C2','G2','A2','F2','C2','G2','A2','E2'] },
+  { name: 'MONTE ALBÁN RUN',  artist: 'Luis Cruz OST', bpm: 160, wave:'square',
+    melody:['C5','C5','G4','G4','A4','A4','G4','R','F4','F4','E4','E4','D4','D4','C4','R','G4','G4','F4','F4','E4','E4','D4','R','G4','G4','F4','F4','E4','E4','D4','R','C5','B4','A4','G4','F4','E4','D4','C4'],
+    bass:['C2','F2','G2','C2','C2','F2','G2','G2'] },
+  { name: 'CERRO VERDE',      artist: 'Luis Cruz OST', bpm: 110, wave:'sine',
+    melody:['A4','R','A4','B4','C5','R','C5','B4','A4','R','G4','A4','B4','R','B4','A4','G4','R','F4','G4','A4','R','A4','G4','F4','R','E4','F4','G4','A4','R','A4','B4','C5','R'],
+    bass:['A2','E2','F2','C2','A2','E2','F2','G2'] },
+  { name: 'ZAPOTEC BASS',     artist: 'Luis Cruz OST', bpm: 130, wave:'sawtooth',
+    melody:['D4','D4','R','F4','R','A4','R','D5','R','A4','R','F4','D4','R','C4','D4','R','E4','R','G4','R','C5','R','G4','E4','R','D4','R','F4','A4','R','D5','C5','Bb3','A3'],
+    bass:['D2','A2','Bb2','F2','D2','A2','G2','F2'] },
+  { name: 'LLUVIA 8BIT',      artist: 'Luis Cruz OST', bpm: 95,  wave:'triangle',
+    melody:['E5','D5','C5','B4','A4','G4','F4','E4','R','E4','F4','G4','A4','B4','C5','D5','E5','R','C5','B4','A4','G4','F4','E4','D4','C4','R','C4','D4','E4','F4','G4','A4','B4','C5'],
+    bass:['C2','G2','A2','E2','F2','C2','G2','G2'] },
+  { name: 'HACERLAB FUNK',    artist: 'Luis Cruz OST', bpm: 152, wave:'square',
+    melody:['G4','R','G4','R','A4','G4','R','E4','R','G4','R','D4','R','R','C4','R','G4','R','G4','R','A4','G4','R','E4','R','G4','D5','R','R','D5','C5','R','R','B4','R','Bb4','R'],
+    bass:['G2','D2','E2','C2','G2','D2','F2','C2'] },
+  { name: 'NOCHE TEMPLADA',   artist: 'Luis Cruz OST', bpm: 88,  wave:'sine',
+    melody:['C5','R','E5','R','G5','R','E5','C5','R','R','A4','R','C5','R','E5','R','A5','R','E5','A4','R','R','F4','R','A4','R','C5','R','F5','R','C5','A4','G4','R','R','B4','R','D5','R'],
+    bass:['C2','A2','F2','G2','C2','A2','F2','G2'] },
+];
+
+// Note frequencies
+const NOTE_FREQ = {
+  'C2':65.41,'D2':73.42,'E2':82.41,'F2':87.31,'G2':98.00,'A2':110.00,'B2':123.47,
+  'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'Bb3':233.08,'B3':246.94,
+  'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'Bb4':466.16,'B4':493.88,
+  'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00,'B5':987.77,
+  'R':0
+};
+
+let actx = null;
+let trackIdx = 0;
+let musicPlaying = false;
+let chipNodes = [];
+let loopTimeout = null;
+let startTime = 0;
+let elapsedSeconds = 0;
+let progressInterval = null;
+const TRACK_LOOP_BARS = 8; // loop every N bars worth of notes
+
+function getActx(){
+  if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if(actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+function stopChip(){
+  chipNodes.forEach(n=>{ try{n.stop();}catch(e){} });
+  chipNodes = [];
+  if(loopTimeout){ clearTimeout(loopTimeout); loopTimeout=null; }
+  if(progressInterval){ clearInterval(progressInterval); progressInterval=null; }
+}
+
+function playChip(trackData, onEnd){
+  const ctx = getActx();
+  const { melody, bass, bpm, wave } = trackData;
+  const beatDur = 60 / bpm;
+  const noteDur = beatDur * 0.5;
+  let t = ctx.currentTime + 0.05;
+  startTime = t;
+
+  // Master gain
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.18, t);
+  master.connect(ctx.destination);
+
+  // Reverb-like: tiny delay
+  const delay = ctx.createDelay(0.08);
+  delay.delayTime.setValueAtTime(0.06, t);
+  const delayGain = ctx.createGain();
+  delayGain.gain.setValueAtTime(0.12, t);
+  master.connect(delay);
+  delay.connect(delayGain);
+  delayGain.connect(master);
+
+  // Schedule melody
+  melody.forEach((note, i) => {
+    const freq = NOTE_FREQ[note] || 0;
+    if(freq === 0){ t += noteDur; return; }
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.35, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + noteDur * 0.85);
+    osc.connect(g); g.connect(master);
+    osc.start(t); osc.stop(t + noteDur);
+    chipNodes.push(osc);
+    t += noteDur;
+  });
+
+  const totalDur = melody.length * noteDur;
+
+  // Schedule bass line (loops over melody duration)
+  let bt = ctx.currentTime + 0.05;
+  const bassDur = totalDur / bass.length;
+  bass.forEach((note, i) => {
+    const freq = NOTE_FREQ[note] || 0;
+    if(freq === 0){ bt += bassDur; return; }
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, bt);
+    g.gain.setValueAtTime(0.18, bt);
+    g.gain.exponentialRampToValueAtTime(0.001, bt + bassDur * 0.9);
+    osc.connect(g); g.connect(master);
+    osc.start(bt); osc.stop(bt + bassDur);
+    chipNodes.push(osc);
+    bt += bassDur;
+  });
+
+  // Percussion (simple kick + hihat)
+  const kickTimes = [0, beatDur*2, beatDur*4, beatDur*6];
+  const hihatTimes = Array.from({length:16},(_,i)=>i*beatDur*0.5);
+  const pStart = ctx.currentTime + 0.05;
+
+  kickTimes.forEach(kt => {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.04));
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const kg = ctx.createGain(); kg.gain.setValueAtTime(0.5, pStart+kt);
+    src.connect(kg); kg.connect(master);
+    src.start(pStart+kt);
+    chipNodes.push(src);
+  });
+
+  hihatTimes.forEach(ht => {
+    if(ht >= totalDur) return;
+    const buf = ctx.createBuffer(1, ctx.sampleRate*0.03, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(ctx.sampleRate*0.008));
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const hg = ctx.createGain(); hg.gain.setValueAtTime(0.08, pStart+ht);
+    const hf = ctx.createBiquadFilter(); hf.type='highpass'; hf.frequency.value=8000;
+    src.connect(hf); hf.connect(hg); hg.connect(master);
+    src.start(pStart+ht);
+    chipNodes.push(src);
+  });
+
+  // Progress bar update
+  progressInterval = setInterval(()=>{
+    if(!musicPlaying) return;
+    const elapsed = (actx.currentTime - startTime);
+    const pct = Math.min((elapsed / totalDur) * 100, 100);
+    document.getElementById('track-progress').style.width = pct + '%';
+    document.getElementById('track-cur').textContent = fmtTime(Math.min(elapsed, totalDur));
+    document.getElementById('track-dur').textContent = fmtTime(totalDur);
+  }, 200);
+
+  // Loop / next track
+  loopTimeout = setTimeout(()=>{
+    if(!musicPlaying) return;
+    stopChip();
+    trackIdx = (trackIdx + 1) % TRACKS.length;
+    updateTrackUI();
+    playChip(TRACKS[trackIdx]);
+    showTrackCard();
+  }, totalDur * 1000 + 200);
+}
+
+function updateTrackUI(){
+  const t = TRACKS[trackIdx];
+  document.getElementById('track-name').textContent = t.name;
+  document.getElementById('track-artist').textContent = t.artist;
+  document.getElementById('track-progress').style.width = '0%';
+  document.getElementById('track-cur').textContent = '0:00';
+}
+
+function fmtTime(s){
+  if(!isFinite(s)||s<0) return '0:00';
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60).toString().padStart(2,'0');
+  return `${m}:${sec}`;
+}
+
+function toggleMusic(){
+  const btn = document.getElementById('music-btn');
+  const card = document.getElementById('music-track-card');
+
+  if(!musicPlaying){
+    musicPlaying = true;
+    btn.classList.add('playing');
+    document.getElementById('music-icon').textContent = '◉';
+    updateTrackUI();
+    playChip(TRACKS[trackIdx]);
+    card.classList.add('show');
+    showToast('♪ ' + TRACKS[trackIdx].name);
+    setTimeout(()=>card.classList.remove('show'), 4000);
+  } else {
+    musicPlaying = false;
+    stopChip();
+    btn.classList.remove('playing');
+    document.getElementById('music-icon').textContent = '♪';
+    card.classList.remove('show');
+    showToast('■ MÚSICA PAUSADA');
+  }
+}
+
+function showTrackCard(){
+  const card = document.getElementById('music-track-card');
+  card.classList.add('show');
+  showToast('♪ ' + TRACKS[trackIdx].name);
+  setTimeout(()=>card.classList.remove('show'), 3500);
+}
+
+// ── STAR CLICK — cambia canción y muestra info ────────────────────────
+const starPopup = document.getElementById('star-popup');
+let popupTimer = null;
+
+document.getElementById('stars-canvas').addEventListener('click', e => {
+  if(e.clientY > window.innerHeight * 0.65) return;
+
+  // Ripple burst
+  for(let i=0;i<3;i++){
+    const r = document.createElement('div');
+    r.className = 'star-ripple';
+    const size = 40 + i*30 + Math.random()*20;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-size/2}px;top:${e.clientY-size/2}px;animation-delay:${i*0.12}s;`;
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(), 900);
+  }
+
+  // Advance to next track
+  if(musicPlaying){
+    stopChip();
+    trackIdx = (trackIdx + 1) % TRACKS.length;
+    updateTrackUI();
+    playChip(TRACKS[trackIdx]);
+  } else {
+    trackIdx = (trackIdx + 1) % TRACKS.length;
+    updateTrackUI();
+  }
+
+  // Show popup
+  const t = TRACKS[trackIdx];
+  const status = musicPlaying ? '♪ SIGUIENTE ►' : '♪ SELECCIONADA';
+  starPopup.innerHTML = `<span style="color:#aaa;font-size:5px">${status}</span><br>${t.name}<br><span style="color:#555">${t.artist}</span>`;
+  starPopup.style.left = Math.min(e.clientX + 14, window.innerWidth - 280) + 'px';
+  starPopup.style.top  = (e.clientY - 54) + 'px';
+  starPopup.classList.add('show');
+
+  if(popupTimer) clearTimeout(popupTimer);
+  popupTimer = setTimeout(()=>starPopup.classList.remove('show'), 2800);
+
+  showToast(musicPlaying ? `♪ ${t.name}` : '► CLICK ♪ PARA ESCUCHAR');
+});
+
+// ── BIRD & LIVES SYSTEM ──────────────────────────────────────────────
+let lives = 3;
+let score = 0;
+let birdsAvoided = 0;
+let gameActive = true;
+let invincible = false; // brief invincibility after hit
+
+const birds = []; // active bird objects
+const BIRD_CANVAS_W = 36;
+const BIRD_CANVAS_H = 24;
+
+// Bird sprite drawn on a tiny offscreen canvas
+function makeBirdCanvas(color='#ffcc44', flap=0){
+  const bc = document.createElement('canvas');
+  bc.width = BIRD_CANVAS_W; bc.height = BIRD_CANVAS_H;
+  const bx = bc.getContext('2d');
+  bx.imageSmoothingEnabled = false;
+  const p=(x,y,w,h,c)=>{bx.fillStyle=c;bx.fillRect(x*2,y*2,w*2,h*2);};
+  // Body
+  p(4,4,10,6,color);
+  // Head
+  p(12,3,5,5,color);
+  // Eye
+  p(15,4,2,2,'#111');
+  // Beak
+  p(17,5,3,2,'#ff8800');
+  // Tail
+  p(2,5,3,3,color);
+  p(1,6,2,2,color);
+  // Wing (flap changes position)
+  const wy = flap===0 ? 2 : 7;
+  p(5,wy,8,3,'#fff');
+  p(6,wy+1,6,2,color==='#ffcc44'?'#ffaa00':'#aaaaff');
+  // Legs
+  p(7,10,2,3,'#ff8800');
+  p(11,10,2,3,'#ff8800');
+  return bc;
+}
+
+// Pre-render bird frames
+const BIRD_COLORS = ['#ffcc44','#ff8855','#88ccff','#ff88aa','#aaffaa'];
+const birdFrames = BIRD_COLORS.map(c => [makeBirdCanvas(c,0), makeBirdCanvas(c,1)]);
+
+// Bird canvas overlay (drawn every frame, sits above world)
+const birdCanvas = document.createElement('canvas');
+birdCanvas.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:19;image-rendering:pixelated;';
+document.getElementById('world').appendChild(birdCanvas);
+
+function resizeBirdCanvas(){
+  birdCanvas.width = window.innerWidth;
+  birdCanvas.height = window.innerHeight;
+}
+resizeBirdCanvas();
+window.addEventListener('resize', resizeBirdCanvas);
+
+// Spawn a bird
+// Bird types:
+//   'sky'    — high flyers, easy to dodge by crouching (no crouch yet) or just passing
+//   'low'    — ground level, must JUMP to dodge, red/aggressive sprite
+//   'dive'   — starts high then dips to ground level midscreen
+const LOW_BIRD_COLORS  = ['#ff3322','#ff5500','#cc2200']; // reds/oranges = danger
+const LOW_BIRD_FRAMES  = LOW_BIRD_COLORS.map(c => [makeBirdCanvas(c,0), makeBirdCanvas(c,1)]);
+
+function spawnBird(){
+  if(!gameActive) return;
+  const ww = window.innerWidth;
+  const wh = window.innerHeight;
+  const goLeft = Math.random() < 0.5;
+
+  // Decide type — 35% chance low, 15% dive, 50% sky
+  const roll = Math.random();
+  let type = 'sky';
+  if(roll < 0.35) type = 'low';
+  else if(roll < 0.50) type = 'dive';
+
+  const speed = 2.8 + Math.random() * 3.2 + Math.min(score/300, 4);
+
+  // Y positions
+  // Ground is at bottom 64px. Character stands at ~wh-68-32 = char center
+  const groundTop = wh - 64;                        // pixel ground line
+  const charCenterY = groundTop - 40;               // ~where char torso is
+  const lowY  = charCenterY - 6;                    // exactly at body height
+  const skyYMin = wh * 0.08;
+  const skyYMax = wh * 0.58;
+
+  let y, vy = 0, targetY = null;
+
+  if(type === 'low'){
+    // fly right at character level — add small random vertical offset ±10px
+    y = lowY + (Math.random() * 20 - 10);
+  } else if(type === 'dive'){
+    // start high, dive to low mid-screen
+    y = skyYMin + Math.random() * (skyYMax - skyYMin);
+    targetY = lowY;
+    vy = 0; // will be set dynamically in update
+  } else {
+    y = skyYMin + Math.random() * (skyYMax - skyYMin);
+  }
+
+  const colorIdx = type === 'low' || type === 'dive'
+    ? Math.floor(Math.random() * LOW_BIRD_COLORS.length)
+    : Math.floor(Math.random() * BIRD_COLORS.length);
+
+  birds.push({
+    x: goLeft ? ww + 40 : -40,
+    y,
+    vx: goLeft ? -speed : speed,
+    vy,
+    targetY,
+    type,
+    colorIdx,
+    flapTimer: 0,
+    flapFrame: 0,
+    passed: false,
+    dived: false,
+  });
+}
+
+// Spawn interval — gets faster as score increases
+let birdSpawnInterval = null;
+function resetSpawnInterval(){
+  if(birdSpawnInterval) clearInterval(birdSpawnInterval);
+  const delay = Math.max(900, 2200 - score * 1.5);
+  birdSpawnInterval = setInterval(()=>{
+    if(gameActive) spawnBird();
+  }, delay);
+}
+resetSpawnInterval();
+
+// Update spawn speed every 5s
+setInterval(()=>{
+  if(gameActive) resetSpawnInterval();
+}, 5000);
+
+// Draw + update birds
+const bCtx = birdCanvas.getContext('2d');
+bCtx.imageSmoothingEnabled = false;
+
+function updateBirds(){
+  bCtx.clearRect(0,0,birdCanvas.width,birdCanvas.height);
+  if(!gameActive) return;
+
+  const charWrap = document.getElementById('char-wrap');
+  const cBottom  = parseInt(charWrap.style.bottom || 68);
+  const cLeft    = parseInt(charWrap.style.left   || 120);
+  const wh       = window.innerHeight;
+  const ww       = window.innerWidth;
+
+  // Character hitbox in screen coordinates
+  // char-wrap bottom is distance from viewport bottom; canvas y = wh - bottom - height
+  const charScreenX = cLeft;
+  const charScreenY = wh - cBottom - 64; // top of character sprite
+  const CW = 30, CH = 52; // hitbox (slightly forgiving)
+
+  // Ground level for dive birds
+  const groundTop  = wh - 64;
+  const charCenterY = groundTop - 40;
+
+  for(let i = birds.length - 1; i >= 0; i--){
+    const b = birds[i];
+    b.x += b.vx;
+    b.flapTimer++;
+    if(b.flapTimer % 8 === 0) b.flapFrame = 1 - b.flapFrame;
+
+    // Dive bird logic — swoop down as it approaches center screen
+    if(b.type === 'dive' && !b.dived){
+      const midX = ww / 2;
+      const distToMid = Math.abs(b.x - midX);
+      if(distToMid < ww * 0.3){
+        // smoothly move toward target Y
+        const diff = charCenterY - b.y;
+        b.y += diff * 0.06;
+        if(Math.abs(diff) < 4) b.dived = true;
+      }
+    }
+
+    // Remove if off screen
+    if(b.x < -100 || b.x > ww + 100){
+      if(!b.passed){ birdsAvoided++; score += 10; updateScoreHUD(); }
+      birds.splice(i, 1);
+      continue;
+    }
+
+    // Score when bird passes the character
+    if(!b.passed){
+      const bPast = b.vx < 0 ? b.x < cLeft - 50 : b.x > cLeft + 60;
+      if(bPast){ b.passed = true; birdsAvoided++; score += 10; updateScoreHUD(); }
+    }
+
+    // Choose correct sprite set
+    const isRed   = b.type === 'low' || b.type === 'dive';
+    const frames  = isRed ? LOW_BIRD_FRAMES[b.colorIdx] : birdFrames[b.colorIdx];
+    const frame   = frames[b.flapFrame];
+
+    // Draw warning shadow under low/dive birds
+    if(isRed){
+      bCtx.save();
+      bCtx.globalAlpha = 0.25;
+      bCtx.fillStyle = '#ff0000';
+      bCtx.beginPath();
+      bCtx.ellipse(b.x + BIRD_CANVAS_W/2, wh - 60, 20, 6, 0, 0, Math.PI*2);
+      bCtx.fill();
+      bCtx.restore();
+
+      // Danger warning arrow above bird
+      if(b.type === 'low'){
+        bCtx.save();
+        bCtx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/120);
+        bCtx.fillStyle = '#ff4400';
+        bCtx.font = 'bold 13px monospace';
+        bCtx.fillText('▼', b.x + BIRD_CANVAS_W/2 - 6, b.y - 6);
+        bCtx.restore();
+      }
+    }
+
+    // Draw bird (flip horizontally if going right)
+    bCtx.save();
+    if(b.vx > 0){
+      bCtx.translate(b.x + BIRD_CANVAS_W, b.y);
+      bCtx.scale(-1, 1);
+      bCtx.drawImage(frame, 0, 0);
+    } else {
+      bCtx.drawImage(frame, b.x, b.y);
+    }
+    bCtx.restore();
+
+    // Collision detection
+    // Tight hitbox per type:
+    // sky birds: smaller box (head+body only)
+    // low/dive:  full body box — they are AT character level
+    const bx = b.x + 4;
+    const by = b.y + 2;
+    const bw = 26;
+    const bh = isRed ? 18 : 14;
+
+    if(!invincible &&
+       bx < charScreenX + CW && bx + bw > charScreenX &&
+       by < charScreenY + CH && by + bh > charScreenY){
+      takeDamage(i);
+    }
+  }
+}
+
+function takeDamage(birdIdx){
+  if(invincible || !gameActive) return;
+  lives--;
+  invincible = true;
+
+  // Remove the bird that hit
+  birds.splice(birdIdx, 1);
+
+  // Flash character
+  document.getElementById('character').classList.add('hit');
+  setTimeout(()=>document.getElementById('character').classList.remove('hit'), 400);
+
+  // Update hearts
+  const heartEl = document.getElementById(`life-${lives+1}`);
+  if(heartEl){ heartEl.classList.add('lost'); heartEl.textContent = '🖤'; }
+
+  // Hit sound
+  playHitSound();
+  showToast(`💥 -1 VIDA! ${lives} RESTANTES`);
+
+  if(lives <= 0){
+    gameOver();
+  } else {
+    // Invincibility window: 2.5s
+    setTimeout(()=>{ invincible = false; }, 2500);
+    // Blink character during invincibility
+    let blinks = 0;
+    const blinkInt = setInterval(()=>{
+      document.getElementById('charCanvas').style.opacity =
+        document.getElementById('charCanvas').style.opacity === '0.2' ? '1' : '0.2';
+      if(++blinks >= 10){ clearInterval(blinkInt); document.getElementById('charCanvas').style.opacity = '1'; }
+    }, 250);
+  }
+}
+
+function gameOver(){
+  gameActive = false;
+  clearInterval(birdSpawnInterval);
+  birds.length = 0;
+  bCtx.clearRect(0,0,birdCanvas.width,birdCanvas.height);
+  document.getElementById('go-score').textContent = `SCORE FINAL: ${score} PTS | AVES: ${birdsAvoided}`;
+  document.getElementById('gameover').classList.add('show');
+  playGameOverSound();
+}
+
+function revive(){
+  lives = 3; score = 0; birdsAvoided = 0;
+  gameActive = true; invincible = false;
+  birds.length = 0;
+  document.getElementById('gameover').classList.remove('show');
+  // Reset hearts
+  for(let i=1;i<=3;i++){
+    const h = document.getElementById(`life-${i}`);
+    h.classList.remove('lost'); h.textContent = '❤️';
+  }
+  updateScoreHUD();
+  resetSpawnInterval();
+  showToast('★ REVIVE! ¡ESQUIVA LAS AVES!');
+}
+
+function updateScoreHUD(){
+  document.getElementById('score-val').textContent  = `SCORE: ${score}`;
+  document.getElementById('birds-val').textContent  = `AVES: ${birdsAvoided}`;
+}
+
+// ── SFX ──────────────────────────────────────
+function playHitSound(){
+  const ctx2 = getActx();
+  const o = ctx2.createOscillator();
+  const g = ctx2.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(440, ctx2.currentTime);
+  o.frequency.exponentialRampToValueAtTime(55, ctx2.currentTime + 0.3);
+  g.gain.setValueAtTime(0.3, ctx2.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.35);
+  o.connect(g); g.connect(ctx2.destination);
+  o.start(); o.stop(ctx2.currentTime + 0.35);
+}
+
+function playGameOverSound(){
+  const ctx2 = getActx();
+  const notes = [392, 349, 330, 262];
+  notes.forEach((freq, i) => {
+    const o = ctx2.createOscillator();
+    const g = ctx2.createGain();
+    o.type = 'square';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.25, ctx2.currentTime + i*0.2);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + i*0.2 + 0.35);
+    o.connect(g); g.connect(ctx2.destination);
+    o.start(ctx2.currentTime + i*0.2);
+    o.stop(ctx2.currentTime + i*0.2 + 0.4);
+  });
+}
+
+function playJumpSound(){
+  const ctx2 = getActx();
+  const o = ctx2.createOscillator();
+  const g = ctx2.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(220, ctx2.currentTime);
+  o.frequency.exponentialRampToValueAtTime(880, ctx2.currentTime + 0.1);
+  g.gain.setValueAtTime(0.15, ctx2.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.15);
+  o.connect(g); g.connect(ctx2.destination);
+  o.start(); o.stop(ctx2.currentTime + 0.15);
+}
+
+// Inject bird update into the main game loop — hook into charLoop RAF
+const _origCharLoop = charLoop;
+// Instead of re-defining, patch the RAF to also call updateBirds
+const _origRAF = window.requestAnimationFrame.bind(window);
+// We'll piggyback updateBirds on charLoop via a wrapper
+(function patchLoop(){
+  // The charLoop already calls requestAnimationFrame(charLoop)
+  // We patch it by replacing the exported function reference — but since
+  // charLoop is a declaration, we add a parallel RAF loop instead.
+  function birdLoop(){
+    updateBirds();
+    requestAnimationFrame(birdLoop);
+  }
+  birdLoop();
+})();
+
+// Show intro bird warning
+setTimeout(()=>{
+  showToast('🐦 ¡ESQUIVA LAS AVES O PERDERÁS VIDAS!');
+}, 3500);
+
+// Resize stars canvas
+window.addEventListener('resize',()=>{
+  const c=document.getElementById('stars-canvas');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+});
+
+// Opening bubble
+setTimeout(()=>{
+  showBubble('¡HOLA! SOY LUIS CRUZ', '¡Bienvenido a mi portafolio!<br>Usa ← → para moverme y explora los objetos del suelo para ver mi CV. 🌵');
+},800);
+</script>
+</body>
+</html>
